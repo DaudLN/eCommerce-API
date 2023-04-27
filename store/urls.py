@@ -10,5 +10,7 @@ urlpatterns = [
     path("select-related/", views.select_related,
          name="select-related"),
     path("orders/", views.last_five_orders_with_their_customer,
-         name="orders")
+         name="orders"),
+    path("stats/", views.statistics,
+         name="stats")
 ]

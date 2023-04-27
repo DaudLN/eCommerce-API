@@ -1,4 +1,5 @@
 from django.db.models import Q, F
+from django.db.models.aggregates import Avg, Count, Sum, Max, Min
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext as _
@@ -42,6 +43,19 @@ def last_five_orders_with_their_customer(request):
     query_set = Order.objects.select_related("customer")\
         .prefetch_related("orderitem_set__product")\
         .order_by("-placed_at")[:5]
-    print(list(query_set.values()))
     return render(request, "store/orders.html",
                   {"orders": query_set})
+
+
+def statistics(request):
+    count = Product.objects.aggregate(count=Count("id"))
+    max_price = Product.objects.aggregate(max_price=Max("unit_price"))
+    min_price = Product.objects.aggregate(min_price=Min("unit_price"))
+    total_price = Product.objects.aggregate(total_price=Sum("unit_price"))
+    avg_price = Product.objects.aggregate(avg_price=Avg("unit_price"))
+
+    stats = {"count": count, "max_price": max_price,
+             "min_price": min_price, "total_price": total_price,
+             "avg_price": avg_price}
+    return render(request, "store/stats.html",
+                  {"stats": stats})

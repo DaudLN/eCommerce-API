@@ -1,0 +1,26 @@
+{% extends "base.html" %} 
+{% block style %}
+
+{% endblock style %}
+{% block content %}
+   <table class="table">
+        <thead>
+            <tr>
+                <th>Total products</th>
+                <th>Maximum price</th>
+                <th>Minimum price</th>
+                <th>Total price</th>
+                <th>Average price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{stats.count.count}}</td>
+                <td>{{stats.max_price.max_price}}</td>
+                <td>{{stats.min_price.min_price}}</td>
+                <td>{{stats.total_price.total_price}}</td>
+                <td>{{stats.avg_price.avg_price}}</td>
+            </tr>
+        </tbody>
+   </table>
+{% endblock content %}
