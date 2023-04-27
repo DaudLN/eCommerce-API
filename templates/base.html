@@ -8,12 +8,17 @@
       rel="stylesheet"
       href="http://localhost/assets/bootstrap/css/bootstrap.min.css"
     />
+    <style>
+      a {
+        text-decoration: none;
+      }
+    </style>
     <title>Storefront</title>
-    {% block style %}
-      
-    {% endblock style %}
+    {% block style %} {% endblock style %}
   </head>
   <body>
-    <main class="container my-4">{% block content %} {% endblock content %}</main>
+    <main class="container my-4">
+      {% block content %} {% endblock content %}
+    </main>
   </body>
 </html>

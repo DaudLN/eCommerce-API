@@ -1,17 +1,13 @@
 {% extends "base.html" %} 
 {% block style %}
-  <style>
-    a{
-        text-decoration: none;
-    }
-  </style>
+
 {% endblock style %}
 {% block content %}
     <h1>Hello {{name}}</h1>
     <ul class="list-group">
         {% for product in products %}
           <li class="list-group-item">
-            <a href="{{ product.get_absolute_url }}" class="fst-none">{{product.title}}</a>
+            <a href="{{product.get_absolute_url}}" class="fst-none">{{product.title}}</a>
           </li>
         {% endfor %}
     </ul>

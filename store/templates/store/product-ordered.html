@@ -1,0 +1,13 @@
+{% extends "base.html" %} 
+{% block content %} 
+    <h1>{{product_ordered|length}} Ordered Product{{product_ordered|length|pluralize}}</h1>
+    <ul class="list-group">
+        {% for product in product_ordered %}
+        <li class="list-group-item">
+        <a href="{{ product.get_absolute_url }}"
+            >{{product.title}}</a
+        >
+        </li>
+        {% endfor %} 
+    </ul>
+{% endblock content %}
