@@ -30,7 +30,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_filter = ['collection']
 
-    @admin.display(ordering='inventory')
+    @admin.display(ordering='inventory', description="Inventory status")
     def inventory_status(self, product):
         if product.inventory < 10:
             return "Low"
