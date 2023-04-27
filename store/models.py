@@ -24,6 +24,12 @@ class Collection(models.Model):
     featured_product = models.ForeignKey(
         'Product', on_delete=models.SET_NULL, null=True, related_name="+")
 
+    class Meta:
+        ordering = ['title']
+
+    def __str__(self):
+        return self.title
+
 
 class Product(models.Model):
     title = models.CharField(max_length=255)
@@ -35,6 +41,12 @@ class Product(models.Model):
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
     promossions = models.ManyToManyField(
         Promossion, verbose_name=_("Promossion"))
+
+    class Meta:
+        ordering = ["title"]
+        managed = True
+        verbose_name = 'Product'
+        verbose_name_plural = 'Products'
 
     def get_absolute_url(self):
         return reverse("store:product", args=[self.pk])
@@ -56,6 +68,9 @@ class Customer(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     membership = models.CharField(
         max_length=1, choices=Membership.choices, default=Membership.Blonze)
+
+    class Meta:
+        ordering = ['first_name', 'last_name']
 
     def __str__(self):
         return self.first_name
