@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
@@ -34,6 +35,9 @@ class Product(models.Model):
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
     promossions = models.ManyToManyField(
         Promossion, verbose_name=_("Promossion"))
+
+    def get_absolute_url(self):
+        return reverse("store:product", args=[self.pk])
 
 
 class Customer(models.Model):
