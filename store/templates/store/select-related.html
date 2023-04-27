@@ -1,0 +1,17 @@
+{% extends "base.html" %} 
+{% block style %}
+
+{% endblock style %}
+{% block content %}
+    <ul class="list-group">
+        {% for product in products %}
+          <li class="list-group-item">
+            <a href="{{product.get_absolute_url}}" class="fst-none">{{product.title}}</a>
+             - {{product.collection.title}} 
+             {% if product.promossions %}
+               - {{product.promossions.discout}}
+             {% endif %}
+          </li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

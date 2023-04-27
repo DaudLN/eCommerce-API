@@ -39,6 +39,9 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse("store:product", args=[self.pk])
 
+    def __str__(self):
+        return self.title
+
 
 class Customer(models.Model):
     class Membership(models.TextChoices):
@@ -54,6 +57,9 @@ class Customer(models.Model):
     membership = models.CharField(
         max_length=1, choices=Membership.choices, default=Membership.Blonze)
 
+    def __str__(self):
+        return self.first_name
+
 
 class Order(models.Model):
     class PaymentStatus(models.TextChoices):
@@ -63,14 +69,14 @@ class Order(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
         max_length=1, choices=PaymentStatus.choices, default=PaymentStatus.Pending)
-    customer = models.ForeignKey(Customer(), on_delete=models.PROTECT)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = _("Order")
         verbose_name_plural = _("Orders")
 
     def __str__(self):
-        return self.name
+        return str(self.id)
 
 
 class OrderItem(models.Model):

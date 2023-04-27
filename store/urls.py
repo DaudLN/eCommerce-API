@@ -1,10 +1,14 @@
 from django.urls import path, re_path
-from .views import home, product, product_that_has_been_ordered
+from . import views
 
 app_name = "store"
 
 urlpatterns = [
-    path("", home, name="home"),
-    path("<int:pk>/", product, name="product"),
-    path("ordered/", product_that_has_been_ordered, name="ordered-product")
+    path("", views.home, name="home"),
+    path("<int:pk>/", views.product, name="product"),
+    path("ordered/", views.product_that_has_been_ordered, name="ordered-product"),
+    path("select-related/", views.select_related,
+         name="select-related"),
+    path("orders/", views.last_five_orders_with_their_customer,
+         name="orders")
 ]
