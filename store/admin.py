@@ -5,6 +5,18 @@ from django.utils.html import format_html, urlencode
 from . import models
 # Register your models here.
 
+# Inlines
+
+
+class OrderItemInline(admin.TabularInline):
+    '''Tabular Inline View for OrderItem'''
+    autocomplete_fields = ["product"]
+    model = models.OrderItem
+    min_num = 1
+    max_num = 20
+    extra = 0
+    # raw_id_fields = ("orderitem_id",)
+
 
 class InventoryFilter(admin.SimpleListFilter):
     title = 'Inventory'
@@ -31,7 +43,7 @@ class CustomerAdmin(admin.ModelAdmin):
     list_filter = ['membership']
 
     @admin.display(ordering="orders_count",)
-    def orders_count(self, customer):
+    def orders_count(self, customer: models.Customer):
         customer_url = reverse("admin:store_order_changelist")+"?" + urlencode(
             {"customer__id": str(customer.id)}
         )
@@ -49,15 +61,16 @@ class CollectionAdmin(admin.ModelAdmin):
 
     list_display = ['title', "products_count"]
     search_fields = ['title']
+    autocomplete_fields = ["featured_product"]
 
     @admin.display(ordering='products_count')
-    def products_count(self, collection):
+    def products_count(self, collection: models.Collection):
         collection_url = reverse("admin:store_product_changelist")+"?" + urlencode(
             {"collection__id": str(collection.id)}
         )
         return format_html(f"<a href='{collection_url}'>{collection.products_count}</a>")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         queryset = super().get_queryset(request).annotate(
             products_count=Count("product"))
         return queryset
@@ -88,11 +101,11 @@ class ProductAdmin(admin.ModelAdmin):
         'slug': ("title",),
     }
 
-    def collection_title(self, product):
+    def collection_title(self, product: models.Product):
         return product.collection.title
 
     @admin.display(ordering='inventory', description="Inventory status")
-    def inventory_status(self, product):
+    def inventory_status(self, product: models.Product):
         if product.inventory < 10:
             return "Low"
         return "OK"
@@ -104,3 +117,4 @@ class OrderAdmin(admin.ModelAdmin):
     list_select_related = ['customer']
     list_display = ["id", "placed_at", "payment_status", "customer"]
     list_filter = ["payment_status"]
+    inlines = [OrderItemInline]

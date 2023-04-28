@@ -1,22 +1,27 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
+# Inlines
 
-class Promossion(models.Model):
+
+
+class Promotion(models.Model):
     description = models.CharField(max_length=255)
-    discout = models.DecimalField(max_digits=6, decimal_places=2)
+    discout = models.DecimalField(
+        max_digits=6, decimal_places=2, validators=[MinValueValidator(1)])
 
     class Meta:
-        verbose_name = _("Promossion")
-        verbose_name_plural = _("Promossions")
+        verbose_name = _("promotion")
+        verbose_name_plural = _("promotions")
 
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("Promossion_detail", kwargs={"pk": self.pk})
+        return reverse("promotion_detail", kwargs={"pk": self.pk})
 
 
 class Collection(models.Model):
@@ -35,12 +40,13 @@ class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(_("Slug field"))
     description = models.TextField()
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
-    inventory = models.IntegerField()
+    unit_price = models.DecimalField(
+        max_digits=6, decimal_places=2, validators=[MinValueValidator(1)])
+    inventory = models.IntegerField(validators=[MinValueValidator(1)])
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
-    promossions = models.ManyToManyField(
-        Promossion, verbose_name=_("Promossion"))
+    promotions = models.ManyToManyField(
+        Promotion, verbose_name=_("promotion"), blank=True)
 
     class Meta:
         ordering = ["title"]
@@ -98,7 +104,8 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product,  on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    unit_price = models.DecimalField(
+        max_digits=6, decimal_places=2, validators=[MinValueValidator(1)])
 
 
 class Cart(models.Model):
