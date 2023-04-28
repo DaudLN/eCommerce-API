@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "debug_toolbar",
     "store.apps.StoreConfig",
+    "store_custom.apps.StoreCustomConfig",
     "tag.apps.TagConfig",
     "like.apps.LikeConfig",
 ]
