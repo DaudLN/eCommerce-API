@@ -26,7 +26,7 @@ from store.models import Product, Collection
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ['id', 'title']
+        fields = ['id']
 
 
 class ProductSerializer(serializers.ModelSerializer):
