@@ -1,11 +1,12 @@
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
 from store.models import Product, Collection
 from .serializer import ProductSerializer, CollectionSerialize, CollectionSerializer
 # Create your views here.
@@ -163,6 +164,46 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.select_related("featured_product")\
         .annotate(products_count=Count("products")).all()
     serializer_class = CollectionSerializer
+
+    def delete(self, request, pk):
+        collection = get_object_or_404(Collection, pk=pk)
+        if collection.products.count() > 0:
+            return Response(
+                {"error": "This collection can't be deleted because it has some products"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        collection.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Using viewsets -> ModelViewSet support all operations to endpoint,
+# We may use ReadOnlyModelViewSet to limit operations
+
+
+class ProductViewSet(ModelViewSet):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.select_related("collection")\
+        .annotate(orders_count=Count("orderitems")).all()
+    serializer_class = ProductSerializer
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def delete(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        if product.orderitems.count() > 0:
+            return Response(
+                {"error": "This product can't be deleted because it has some orders"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CollectionViewSet(ModelViewSet):
+    queryset = Collection.objects.select_related("featured_product")\
+        .annotate(products_count=Count("products")).all()
+    serializer_class = CollectionSerializer
+
+    def get_serializer_context(self):
+        return {"request": self.request}
 
     def delete(self, request, pk):
         collection = get_object_or_404(Collection, pk=pk)
