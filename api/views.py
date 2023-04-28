@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework.generics import ListCreateAPIView
 from rest_framework import status
 from store.models import Product, Collection
-from .serializer import ProductSerializer, CollectionSerialize
+from .serializer import ProductSerializer, CollectionSerialize, CollectionSerializer
 # Create your views here.
 
 
@@ -65,7 +66,7 @@ def collection(request, pk):
     query_set = Collection.objects.annotate(
         products_count=Count("products")).all()
     collection = get_object_or_404(query_set, pk=pk)
-    serializer = CollectionSerialize(collection)
+    serializer = CollectionSerializer(collection)
     return Response(serializer.data)
 
 
@@ -91,11 +92,12 @@ class ProductList(APIView):
 
 class ProductDetail(APIView):
     def get(self, request, pk):
-        query_set = Product.objects.select_related("collection").all()
+        query_set = Product.objects.select_related("collection")\
+            .annotate(orders_count=Count("orderitems")).all()
         serializer = ProductSerializer(
             get_object_or_404(query_set, pk=pk),
             context={"request": request})
-        return Response(serializer.data)
+        return Response({"message": "success", "data": serializer.data})
 
     def put(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
@@ -112,3 +114,31 @@ class ProductDetail(APIView):
                 status=status.HTTP_405_METHOD_NOT_ALLOWED)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Generic views
+
+
+class ProductListCreateAPIView(ListCreateAPIView):
+    queryset = Product.objects.select_related("collection")\
+        .annotate(orders_count=Count("orderitems")).all()
+
+    # def get_queryset(self):
+    #     return Product.objects.select_related("collection")\
+    #         .annotate(orders_count=Count("orderitems"))
+
+    serializer_class = ProductSerializer
+
+    # def get_serializer_class(self):
+    #     return ProductSerializer
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+
+class CollectionListCreateAPIView(ListCreateAPIView):
+    queryset = Collection.objects.select_related("featured_product")\
+        .annotate(products_count=Count("products")).all()
+    serializer_class = CollectionSerializer
+
+    def get_serializer_context(self):
+        return {"request": self.request}
