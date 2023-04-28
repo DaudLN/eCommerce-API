@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "store_custom.apps.StoreCustomConfig",
     "tag.apps.TagConfig",
     "like.apps.LikeConfig",
+    "api.apps.ApiConfig",
 ]
 
 MIDDLEWARE = [
@@ -147,3 +148,7 @@ INTERNAL_IPS = [
 #     ("en", _("English")),
 #     ("fr", _("French")),
 # )
+
+REST_FRAMEWORK = {
+    "COERCE_DECIMAL_TO_STRING": False
+}

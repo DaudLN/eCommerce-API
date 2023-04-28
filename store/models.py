@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, StepValueValidator
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 # Create your models here.
@@ -7,11 +7,10 @@ from django.utils.translation import gettext_lazy as _
 # Inlines
 
 
-
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
     discout = models.DecimalField(
-        max_digits=6, decimal_places=2, validators=[MinValueValidator(1)])
+        max_digits=6, decimal_places=2, validators=[MinValueValidator(1), StepValueValidator(0.1)])
 
     class Meta:
         verbose_name = _("promotion")
@@ -41,7 +40,7 @@ class Product(models.Model):
     slug = models.SlugField(_("Slug field"))
     description = models.TextField()
     unit_price = models.DecimalField(
-        max_digits=6, decimal_places=2, validators=[MinValueValidator(1)])
+        max_digits=6, decimal_places=2, validators=[MinValueValidator(1), StepValueValidator(0.1)])
     inventory = models.IntegerField(validators=[MinValueValidator(1)])
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
@@ -105,7 +104,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(
-        max_digits=6, decimal_places=2, validators=[MinValueValidator(1)])
+        max_digits=6, decimal_places=2, validators=[MinValueValidator(1), StepValueValidator(0.1)])
 
 
 class Cart(models.Model):
