@@ -43,7 +43,8 @@ class Product(models.Model):
         max_digits=6, decimal_places=2, validators=[MinValueValidator(1), StepValueValidator(0.1)])
     inventory = models.IntegerField(validators=[MinValueValidator(1)])
     last_update = models.DateTimeField(auto_now=True)
-    collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
+    collection = models.ForeignKey(
+        Collection, on_delete=models.PROTECT, related_name="products")
     promotions = models.ManyToManyField(
         Promotion, verbose_name=_("promotion"), blank=True)
 
