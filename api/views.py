@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from store.models import Product, Collection
 from .serializer import ProductSerializer, CollectionSerialize, CollectionSerializer
@@ -90,30 +90,30 @@ class ProductList(APIView):
         return Response({"message": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
 
 
-class ProductDetail(APIView):
-    def get(self, request, pk):
-        query_set = Product.objects.select_related("collection")\
-            .annotate(orders_count=Count("orderitems")).all()
-        serializer = ProductSerializer(
-            get_object_or_404(query_set, pk=pk),
-            context={"request": request})
-        return Response({"message": "success", "data": serializer.data})
+# class ProductDetail(APIView):
+#     def get(self, request, pk):
+#         query_set = Product.objects.select_related("collection")\
+#             .annotate(orders_count=Count("orderitems")).all()
+#         serializer = ProductSerializer(
+#             get_object_or_404(query_set, pk=pk),
+#             context={"request": request})
+#         return Response({"message": "success", "data": serializer.data})
 
-    def put(self, request, pk):
-        product = get_object_or_404(Product, pk=pk)
-        serializer = ProductSerializer(instance=product, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     def put(self, request, pk):
+#         product = get_object_or_404(Product, pk=pk)
+#         serializer = ProductSerializer(instance=product, data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, pk):
-        product = get_object_or_404(Product, pk=pk)
-        if product.orderitems.count() > 0:
-            return Response(
-                {"error": "This product can't be deleted because it has some orders"},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+#     def delete(self, request, pk):
+#         product = get_object_or_404(Product, pk=pk)
+#         if product.orderitems.count() > 0:
+#             return Response(
+#                 {"error": "This product can't be deleted because it has some orders"},
+#                 status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#         product.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Generic views
 
@@ -135,6 +135,21 @@ class ProductListCreateAPIView(ListCreateAPIView):
         return {"request": self.request}
 
 
+class ProductDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.select_related("collection")\
+        .annotate(orders_count=Count("orderitems")).all()
+    serializer_class = ProductSerializer
+
+    def delete(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        if product.orderitems.count() > 0:
+            return Response(
+                {"error": "This product can't be deleted because it has some orders"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class CollectionListCreateAPIView(ListCreateAPIView):
     queryset = Collection.objects.select_related("featured_product")\
         .annotate(products_count=Count("products")).all()
@@ -142,3 +157,18 @@ class CollectionListCreateAPIView(ListCreateAPIView):
 
     def get_serializer_context(self):
         return {"request": self.request}
+
+
+class CollectionDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.select_related("featured_product")\
+        .annotate(products_count=Count("products")).all()
+    serializer_class = CollectionSerializer
+
+    def delete(self, request, pk):
+        collection = get_object_or_404(Collection, pk=pk)
+        if collection.products.count() > 0:
+            return Response(
+                {"error": "This collection can't be deleted because it has some products"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        collection.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

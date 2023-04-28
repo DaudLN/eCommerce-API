@@ -38,7 +38,7 @@ class ProductSerializer(serializers.ModelSerializer):
     collection = serializers.PrimaryKeyRelatedField(
         queryset=Collection.objects.all()
     )
-    orders_count = serializers.IntegerField()
+    orders_count = serializers.IntegerField(read_only=True)
 
     # collection = serializers.HyperlinkedRelatedField(
     #     queryset=Collection.objects.all(),
