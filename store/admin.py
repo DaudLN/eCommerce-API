@@ -96,7 +96,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ['collection', InventoryFilter]
     list_per_page = 10
     list_select_related = ['collection']
-    search_fields = ["title"]
+    search_fields = ["title", 'slug']
     prepopulated_fields = {
         'slug': ("title",),
     }

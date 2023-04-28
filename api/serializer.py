@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import Product, Collection
+from store.models import Product, Collection, Order
 
 
 # class CollectionSerializer(serializers.Serializer):
@@ -32,14 +32,17 @@ class CollectionSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'title', 'unit_price', 'price_with_tax', 'collection']
-    # collection = serializers.PrimaryKeyRelatedField(
-    #     queryset=Collection.objects.all()
-    # )
-    collection = serializers.HyperlinkedRelatedField(
-        queryset=Collection.objects.all(),
-        view_name="api:collection"
+        fields = ['id', 'title', 'slug', 'description', 'inventory',
+                  'unit_price', 'price_with_tax', 'collection', "orders_count"]
+    collection = serializers.PrimaryKeyRelatedField(
+        queryset=Collection.objects.all()
     )
+    orders_count = serializers.IntegerField()
+
+    # collection = serializers.HyperlinkedRelatedField(
+    #     queryset=Collection.objects.all(),
+    #     view_name="api:collection"
+    # )
     price_with_tax = serializers.SerializerMethodField(
         method_name="calculate_tax")
 
