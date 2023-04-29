@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from store.models import Product, Collection
+from store.models import Product, Collection, OrderItem
 from .serializer import ProductSerializer, CollectionSerialize, CollectionSerializer
 # Create your views here.
 
@@ -176,6 +176,7 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
 
 # Using viewsets -> ModelViewSet support all operations to endpoint,
 # We may use ReadOnlyModelViewSet to limit operations
+# Remember: ViewSet has destroy method for delete
 
 
 class ProductViewSet(ModelViewSet):
@@ -187,14 +188,12 @@ class ProductViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {"request": self.request}
 
-    def delete(self, request, pk):
-        product = get_object_or_404(Product, pk=pk)
-        if product.orderitems.count() > 0:
+    def destroy(self, request, *args, **kwargs):
+        if OrderItem.objects.filter(product_id=kwargs['pk']).count() > 0:
             return Response(
                 {"error": "This product can't be deleted because it has some orders"},
                 status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return super().destroy(request, *args, **kwargs)
 
 
 class CollectionViewSet(ModelViewSet):
@@ -205,11 +204,9 @@ class CollectionViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {"request": self.request}
 
-    def delete(self, request, pk):
-        collection = get_object_or_404(Collection, pk=pk)
-        if collection.products.count() > 0:
+    def destroy(self, request, *args, **kwargs):
+        if Product.objects.filter(collection_id=kwargs['pk']).count() > 0:
             return Response(
                 {"error": "This collection can't be deleted because it has some products"},
                 status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        collection.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return super().destroy(request, *args, **kwargs)
