@@ -37,10 +37,12 @@ class InventoryFilter(admin.SimpleListFilter):
 class CustomerAdmin(admin.ModelAdmin):
     '''Admin View for Customer'''
     list_display = ["first_name", 'last_name', 'membership', "orders_count"]
-    search_fields = ["first_name__icontains"]
     list_editable = ['membership']
-    list_per_page = 10
     list_filter = ['membership']
+    list_per_page = 10
+    list_select_related = ['user']
+    ordering = ['user__first_name', 'user__last_name']
+    search_fields = ["first_name__icontains"]
 
     @admin.display(ordering="orders_count",)
     def orders_count(self, customer: models.Customer):
