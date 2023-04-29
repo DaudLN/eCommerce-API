@@ -1,18 +1,23 @@
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404
+
 from django_filters.rest_framework.backends import DjangoFilterBackend
+
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
-from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+
 from store.models import Product, Collection, OrderItem, Review
+
 from .filters import ProductFilter
+from .pagination import DefaultPagination
 from .serializer import ProductSerializer, CollectionSerializer, ReviewSerializer
-# Create your views here.
 
 
 @api_view(['GET', 'POST'])
@@ -202,6 +207,7 @@ class ProductViewSet(ModelViewSet):
     search_fields = ['title', 'collection__title', 'description']
     filterset_fields = ['collection_id']
     ordering_fields = ['unit_price', 'last_update']
+    pagination_class = DefaultPagination
     queryset = Product.objects\
         .annotate(orders_count=Count("orderitems"), reviews_count=Count("reviews")).all()
     # queryset = Product.objects.select_related("collection")\
