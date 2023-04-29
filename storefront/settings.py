@@ -42,10 +42,10 @@ INSTALLED_APPS = [
     'django_filters',
     "debug_toolbar",
     "store.apps.StoreConfig",
-    "store_custom.apps.StoreCustomConfig",
     "tag.apps.TagConfig",
     "like.apps.LikeConfig",
     "api.apps.ApiConfig",
+    "core.apps.CoreConfig",
 ]
 
 MIDDLEWARE = [
@@ -153,3 +153,6 @@ INTERNAL_IPS = [
 REST_FRAMEWORK = {
     "COERCE_DECIMAL_TO_STRING": False,
 }
+
+
+AUTH_USER_MODEL = 'core.User'
