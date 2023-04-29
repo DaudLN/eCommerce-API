@@ -1,5 +1,6 @@
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404
+from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -8,6 +9,7 @@ from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from store.models import Product, Collection, OrderItem, Review
+from .filters import ProductFilter
 from .serializer import ProductSerializer, CollectionSerializer, ReviewSerializer
 # Create your views here.
 
@@ -182,9 +184,26 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
 
 class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
-    queryset = Product.objects.select_related("collection")\
+
+    # Filtering collections -> request.quest_params contains all parameter string
+    # We may use third part library (django-filter)
+    # def get_queryset(self):
+    #     collection_id = self.request.query_params.get('collection')
+    #     queryset = Product.objects.select_related("collection")\
+    #         .annotate(orders_count=Count("orderitems"), reviews_count=Count("reviews")).all()
+
+    #     if collection_id is not None:
+    #         queryset = queryset.filter(collection_id=collection_id)
+    #     return queryset
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+    filterset_fields = ['collection_id']
+    queryset = Product.objects\
         .annotate(orders_count=Count("orderitems"), reviews_count=Count("reviews")).all()
-    serializer_class = ProductSerializer
+    # queryset = Product.objects.select_related("collection")\
+    #     .annotate(orders_count=Count("orderitems"), reviews_count=Count("reviews")).all()
+    # serializer_class = ProductSerializer
 
     def get_serializer_context(self):
         return {"request": self.request}
