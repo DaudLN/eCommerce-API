@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from store.models import Product, Collection, OrderItem, Review
@@ -197,10 +197,11 @@ class ProductViewSet(ModelViewSet):
     #         queryset = queryset.filter(collection_id=collection_id)
     #     return queryset
 
-    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
     search_fields = ['title', 'collection__title', 'description']
     filterset_fields = ['collection_id']
+    ordering_fields = ['unit_price', 'last_update']
     queryset = Product.objects\
         .annotate(orders_count=Count("orderitems"), reviews_count=Count("reviews")).all()
     # queryset = Product.objects.select_related("collection")\
