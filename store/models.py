@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.urls import reverse
+from uuid import uuid4
 from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
@@ -111,6 +112,7 @@ class OrderItem(models.Model):
 
 
 class Cart(models.Model):
+    id = models.UUIDField(_("Card id"), primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -132,6 +134,7 @@ class CartItem(models.Model):
     class Meta:
         verbose_name = _("CartItem")
         verbose_name_plural = _("CartItems")
+        unique_together = [['cart', 'product']]
 
     def __str__(self):
         return self.name
