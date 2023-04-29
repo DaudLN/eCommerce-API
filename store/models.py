@@ -106,13 +106,14 @@ class OrderItem(models.Model):
         Product,  on_delete=models.PROTECT, related_name="orderitems")
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)])
     unit_price = models.DecimalField(
         max_digits=6, decimal_places=2, validators=[MinValueValidator(1)])
 
 
 class Cart(models.Model):
-    id = models.UUIDField(_("Card id"), primary_key=True, default=uuid4)
+    id = models.UUIDField(_("Cart id"), primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -127,9 +128,11 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey('Cart', on_delete=models.CASCADE)
+    cart = models.ForeignKey(
+        'Cart', on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)])
 
     class Meta:
         verbose_name = _("CartItem")
@@ -137,7 +140,7 @@ class CartItem(models.Model):
         unique_together = [['cart', 'product']]
 
     def __str__(self):
-        return self.name
+        return str(self.id)
 
     def get_absolute_url(self):
         return reverse("CartItem_detail", kwargs={"pk": self.pk})

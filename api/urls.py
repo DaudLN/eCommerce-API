@@ -8,15 +8,22 @@ app_name = "api"
 router = routers.DefaultRouter()
 router.register("products", views.ProductViewSet, basename="products")
 router.register("collections", views.CollectionViewSet)
+router.register("carts", views.CartViewSet, basename='carts')
 
+# Nested routes
+cart_router = routers.NestedSimpleRouter(router, 'carts', lookup='cart')
 products_router = routers.NestedSimpleRouter(
     router, 'products', lookup='product')
+
+# Register child routes
 products_router.register('reviews', views.ReviewViewSet,
                          basename='product-reviews')
+cart_router.register('items', views.CartItemViewSet, basename='cart-items')
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("", include(products_router.urls))
+    path("", include(products_router.urls)),
+    path("", include(cart_router.urls))
 ]
 
 # urlpatterns = [
