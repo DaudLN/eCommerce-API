@@ -1,6 +1,5 @@
 from django.db.models import Count, Sum
 from django.shortcuts import render, get_object_or_404
-
 from django_filters.rest_framework.backends import DjangoFilterBackend
 
 from rest_framework import status
@@ -268,9 +267,10 @@ class CartViewSet(CreateModelMixin,
     def get_serializer_class(self):
         return CartSerializer
 
-    def get_queryset(self):
-        return Cart.objects.prefetch_related("items__product")\
-            .filter(pk=self.kwargs['pk']).annotate(items_count=Count("items")).all()
+    def get_queryset(self):  # FIXME to validate the UUID before querying
+        queryset = Cart.objects.filter(pk=self.kwargs['pk']).prefetch_related(
+            "items__product").annotate(items_count=Count("items")).all()
+        return queryset
 
 
 class CartItemViewSet(ModelViewSet):
@@ -278,6 +278,7 @@ class CartItemViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
+            print(self.request.user)
             return AddCartItemSerializer
         elif self.request.method == 'PATCH':
             return UpdateCartItemSerializer
