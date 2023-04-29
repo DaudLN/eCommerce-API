@@ -151,3 +151,21 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.city}"
+
+
+class Review(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='reviews')
+    name = models.CharField(_("Your name"), max_length=255,)
+    description = models.TextField(_("Your review"))
+    date = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Review")
+        verbose_name_plural = _("Reviews")
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("Review_detail", kwargs={"pk": self.pk})

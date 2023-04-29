@@ -7,8 +7,8 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from store.models import Product, Collection, OrderItem
-from .serializer import ProductSerializer, CollectionSerialize, CollectionSerializer
+from store.models import Product, Collection, OrderItem, Review
+from .serializer import ProductSerializer, CollectionSerializer, ReviewSerializer
 # Create your views here.
 
 
@@ -121,7 +121,7 @@ class ProductList(APIView):
 
 class ProductListCreateAPIView(ListCreateAPIView):
     queryset = Product.objects.select_related("collection")\
-        .annotate(orders_count=Count("orderitems")).all()
+        .annotate(orders_count=Count("orderitems"), reviews_count=Count("reviews")).all()
 
     # def get_queryset(self):
     #     return Product.objects.select_related("collection")\
@@ -138,7 +138,8 @@ class ProductListCreateAPIView(ListCreateAPIView):
 
 class ProductDetail(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.select_related("collection")\
-        .annotate(orders_count=Count("orderitems")).all()
+        .annotate(orders_count=Count("orderitems"),
+                  reviews_count=Count("reviews")).all()
     serializer_class = ProductSerializer
 
     def delete(self, request, pk):
@@ -182,7 +183,7 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
 class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.select_related("collection")\
-        .annotate(orders_count=Count("orderitems")).all()
+        .annotate(orders_count=Count("orderitems"), reviews_count=Count("reviews")).all()
     serializer_class = ProductSerializer
 
     def get_serializer_context(self):
@@ -210,3 +211,16 @@ class CollectionViewSet(ModelViewSet):
                 {"error": "This collection can't be deleted because it has some products"},
                 status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
+
+
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs['product_pk']).all()
+
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+    def get_serializer_context(self):
+        return {"product_id": self.kwargs['product_pk']}

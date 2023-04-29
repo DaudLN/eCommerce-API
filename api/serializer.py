@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import Product, Collection, Order
+from store.models import Product, Collection, Order, Review
 
 
 # class CollectionSerializer(serializers.Serializer):
@@ -34,12 +34,12 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'title', 'slug', 'description', 'inventory',
-                  'unit_price', 'price_with_tax', 'collection', "orders_count"]
+                  'unit_price', 'price_with_tax', 'collection', "orders_count", 'reviews_count']
     collection = serializers.PrimaryKeyRelatedField(
         queryset=Collection.objects.all()
     )
     orders_count = serializers.IntegerField(read_only=True)
-
+    reviews_count = serializers.IntegerField(read_only=True)
     # collection = serializers.HyperlinkedRelatedField(
     #     queryset=Collection.objects.all(),
     #     view_name="api:collection"
@@ -59,3 +59,13 @@ class CollectionSerialize(serializers.ModelSerializer):
 
     # def number_products(self, collection: Collection):
     #     return collection.featured_product.objects.all().count()
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'name', 'description']
+
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        return Review.objects.create(product_id=product_id, **validated_data)
