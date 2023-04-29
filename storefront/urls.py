@@ -23,6 +23,8 @@ admin.site.index_title = "Admin"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("store.urls", namespace="store")),
+    path("auth/", include("djoser.urls")),
+    path("auth/", include("djoser.urls.jwt")),
     path("api/v1/", include("api.urls", namespace="api")),
     path('__debug__/', include('debug_toolbar.urls')),
 ]
