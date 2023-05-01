@@ -14,5 +14,6 @@
   "autoimport.filesToScan": "**/*.{ts,tsx}, **/*.py",
   "python.defaultInterpreterPath": "/bin/python",
   "python.linting.enabled": true,
-  "python.linting.lintOnSave": true
+  "python.linting.lintOnSave": true,
+  "dotenv.enableAutocloaking": false
 }
