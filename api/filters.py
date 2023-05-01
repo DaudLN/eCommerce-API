@@ -1,5 +1,4 @@
 from django_filters.rest_framework import FilterSet
-from rest_framework.decorators import api_view
 from store.models import Product
 
 

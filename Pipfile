@@ -34,6 +34,8 @@ pysqlite3 = "*"
 [dev-packages]
 autopep8 = "*"
 pylint = "*"
+flake8 = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.11"

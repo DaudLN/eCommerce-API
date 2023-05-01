@@ -1,5 +1,4 @@
-from django.urls import include, path, re_path
-from rest_framework.routers import DefaultRouter, SimpleRouter
+from django.urls import include, path
 from rest_framework_nested import routers
 
 from . import views

@@ -1,18 +1,17 @@
-from django.db.models import Count, Sum
-from django.shortcuts import get_object_or_404, render
+from django.db.models import Count
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.generics import (ListCreateAPIView, RetrieveAPIView,
+from rest_framework.generics import (ListCreateAPIView,
                                      RetrieveUpdateDestroyAPIView)
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   RetrieveModelMixin, UpdateModelMixin)
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (AllowAny, DjangoModelPermissions,
-                                        IsAdminUser, IsAuthenticated)
+                                   RetrieveModelMixin)
+
+from rest_framework.permissions import (
+    IsAdminUser, IsAuthenticated)
 from rest_framework.response import Response
-from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
@@ -21,7 +20,7 @@ from store.models import (Cart, CartItem, Collection, Customer, Order,
 
 from .filters import ProductFilter
 from .pagination import DefaultPagination
-from .permissions import (FullDjangoModelPermissions, IsAdminOrReadOnly,
+from .permissions import (IsAdminOrReadOnly,
                           ViewCustomerHistoryPermissions)
 from .serializers import (AddCartItemSerializer, CartItemSerializer,
                           CartSerializer, CollectionSerializer,
@@ -76,7 +75,7 @@ def product_detail(request, pk):
 def collections(request):
     query_set = Collection.objects.annotate(
         products_count=Count("products")).all()
-    serializer = CollectionSerialize(query_set, many=True)
+    serializer = CollectionSerializer(query_set, many=True)
     return Response({"message": "success", "results": query_set.count(), "data": serializer.data}, status=status.HTTP_200_OK)
 
 
