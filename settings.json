@@ -1,0 +1,16 @@
+{
+  "python.formatting.provider": "autopep8",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.formatOnSave": true,
+    "isort.args": ["--profile", "black"],
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "django.snippets.use": true,
+  "django.i18n": true,
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.lintOnSave": true
+}

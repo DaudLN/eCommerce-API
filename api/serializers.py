@@ -1,6 +1,9 @@
 from decimal import Decimal
+
 from rest_framework import serializers
-from store.models import Product, Collection, Order, Review, Cart, CartItem, Customer
+
+from store.models import (Cart, CartItem, Collection, Customer, Order,
+                          OrderItem, Product, Review)
 
 # Model serializers
 
@@ -18,6 +21,7 @@ class ProductSerializer(serializers.ModelSerializer):
     reviews_count = serializers.IntegerField(read_only=True)
     price_with_tax = serializers.SerializerMethodField(
         method_name="calculate_tax")
+    # collection = CollectionSerializer()
 
     class Meta:
         model = Product
@@ -35,14 +39,6 @@ class SimpleProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'title', 'unit_price']
-
-
-class CollectionSerialize(serializers.ModelSerializer):
-    products_count = serializers.IntegerField()
-
-    class Meta:
-        model = Collection
-        fields = ['id', 'title', 'products_count']
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -125,3 +121,49 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']
+
+
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['payment_status']
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity', 'unit_price']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    customer_id = serializers.IntegerField(read_only=True)
+    items = OrderItemSerializer(many=True)
+    items_count = serializers.IntegerField(read_only=True)
+    total_price = serializers.SerializerMethodField(
+        method_name='calculate_total_price')
+
+    class Meta:
+        model = Order
+        fields = ['id', 'customer_id', 'placed_at',
+                  'payment_status', 'items', 'items_count', 'total_price']
+
+    def calculate_total_price(self, order: Order):
+        return sum([item.unit_price*item.quantity for item in order.items.all()])
+
+
+class CompleteOrderSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer()
+    items = OrderItemSerializer(many=True)
+    items_count = serializers.IntegerField(read_only=True)
+    total_price = serializers.SerializerMethodField(
+        method_name='calculate_total_price')
+
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'placed_at', 'payment_status',
+                  'items', 'items_count', 'total_price']
+
+    def calculate_total_price(self, order: Order):
+        return sum([item.unit_price*item.quantity for item in order.items.all()])

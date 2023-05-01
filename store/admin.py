@@ -2,7 +2,9 @@ from django.contrib import admin, messages
 from django.db.models import Count, QuerySet
 from django.urls import reverse
 from django.utils.html import format_html, urlencode
+
 from . import models
+
 # Register your models here.
 
 # Inlines
@@ -41,6 +43,7 @@ class CustomerAdmin(admin.ModelAdmin):
     list_filter = ['membership']
     list_per_page = 10
     list_select_related = ['user']
+    autocomplete_fields = ['user']
     ordering = ['user__first_name', 'user__last_name']
     search_fields = ["first_name__icontains"]
 
@@ -53,7 +56,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         query_set = super().get_queryset(
-            request).annotate(orders_count=Count("order"))
+            request).annotate(orders_count=Count("orders"))
         return query_set
 
 

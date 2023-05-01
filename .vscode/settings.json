@@ -1,8 +1,18 @@
 {
   "python.formatting.provider": "autopep8",
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.autopep8"
-  },
-  "django.snippets.use": true,
-  "django.i18n": true
+  "editor.hideCursorInOverviewRuler": false,
+  "editor.inlayHints.padding": false,
+  "editor.smoothScrolling": true,
+  "editor.stickyScroll.enabled": false,
+  "editor.stickyTabStops": false,
+  "editor.tabFocusMode": false,
+  "workbench.settings.editor": "json",
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "explorer.autoReveal": true,
+  "search.actionsPosition": "right",
+  "djangointellisense.debugMessages": true,
+  "autoimport.filesToScan": "**/*.{ts,tsx}, **/*.py",
+  "python.defaultInterpreterPath": "/bin/python",
+  "python.linting.enabled": true,
+  "python.linting.lintOnSave": true
 }

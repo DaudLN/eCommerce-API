@@ -1,13 +1,36 @@
-from django.db import models
+from uuid import uuid4
+
 from django.conf import settings
 from django.contrib import admin
 from django.core.validators import MinValueValidator
+from django.db import models
 from django.urls import reverse
-from uuid import uuid4
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Count
 # Create your models here.
 
-# Inlines
+# Customer managers
+
+
+class CompletedOrderManager(models.Manager):
+    def get_queryset(self):
+        return Order.objects.filter(payment_status=Order.PaymentStatus.Complete)\
+            .prefetch_related("items", "items__product")\
+            .select_related("customer").annotate(items_count=Count("items"))
+
+
+class PendingOrderManager(models.Manager):
+    def get_queryset(self):
+        return Order.objects.filter(payment_status=Order.PaymentStatus.Pending)\
+            .prefetch_related("items", "items__product")\
+            .select_related("customer").annotate(items_count=Count("items"))
+
+
+class FailOrderManager(models.Manager):
+    def get_queryset(self):
+        return Order.objects.filter(payment_status=Order.PaymentStatus.Fail)\
+            .prefetch_related("items", "items__product")\
+            .select_related("customer").annotate(items_count=Count("items"))
 
 
 class Promotion(models.Model):
@@ -79,7 +102,7 @@ class Customer(models.Model):
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
         permissions = [
-            ('view_history','Can view history')
+            ('view_history', 'Can view history')
         ]
 
     @admin.display(ordering='user__first_name')
@@ -102,7 +125,15 @@ class Order(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
         max_length=1, choices=PaymentStatus.choices, default=PaymentStatus.Pending)
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    customer = models.ForeignKey(
+        Customer, on_delete=models.PROTECT, related_name="orders")
+
+    # Model Managers
+    objects = models.Manager()  # The default manager.
+    # Our custom manager.
+    complete = CompletedOrderManager()
+    fail = FailOrderManager()
+    pending = PendingOrderManager()
 
     class Meta:
         verbose_name = _("Order")
@@ -119,7 +150,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(
         Product,  on_delete=models.PROTECT, related_name="orderitems")
     order = models.ForeignKey(
-        Order, on_delete=models.CASCADE)
+        Order, on_delete=models.CASCADE, related_name='items')
     quantity = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)])
     unit_price = models.DecimalField(

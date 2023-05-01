@@ -1,32 +1,33 @@
 from django.db.models import Count, Sum
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework.backends import DjangoFilterBackend
-
 from rest_framework import status
-from rest_framework.decorators import api_view, action
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
+from rest_framework.decorators import action, api_view
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import (ListCreateAPIView, RetrieveAPIView,
+                                     RetrieveUpdateDestroyAPIView)
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
+from rest_framework.permissions import (AllowAny, DjangoModelPermissions,
+                                        IsAdminUser, IsAuthenticated)
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from store.models import Product, Collection, OrderItem, Review, Cart, CartItem, Customer
+from store.models import (Cart, CartItem, Collection, Customer, Order,
+                          OrderItem, Product, Review)
 
 from .filters import ProductFilter
 from .pagination import DefaultPagination
-from .permissions import IsAdminOrReadOnly, FullDjangoModelPermissions, ViewCustomerHistoryPermissions
-from .serializer import (ProductSerializer,
-                         CollectionSerializer,
-                         ReviewSerializer,
-                         CartSerializer,
-                         CartItemSerializer,
-                         AddCartItemSerializer,
-                         UpdateCartItemSerializer,
-                         CustomerSerializer)
+from .permissions import (FullDjangoModelPermissions, IsAdminOrReadOnly,
+                          ViewCustomerHistoryPermissions)
+from .serializers import (AddCartItemSerializer, CartItemSerializer,
+                          CartSerializer, CollectionSerializer,
+                          CustomerSerializer, CompleteOrderSerializer,
+                          OrderSerializer, ProductSerializer,
+                          ReviewSerializer, UpdateCartItemSerializer)
 
 
 @api_view(['GET', 'POST'])
@@ -304,10 +305,6 @@ class CustomerViewSet(ModelViewSet):
     serializer_class = CustomerSerializer
     permission_classes = [IsAdminUser]
 
-    # def get_permissions(self):
-    #     if self.request.method == 'GET':
-    #         return [AllowAny()]
-    #     return [IsAuthenticated()]
     @action(detail=True, permission_classes=[ViewCustomerHistoryPermissions])
     def history(self, request, pk):
         return Response('Ok')
@@ -324,3 +321,36 @@ class CustomerViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+
+
+class OrderViewSet(ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Order.objects.prefetch_related("items", "items__product")\
+            .select_related("customer").annotate(items_count=Count("items"))
+        if user.is_staff:
+            return queryset.all()
+        customer_id = Customer.objects.only('id')\
+            .filter(user_id=user.id).first()
+        return queryset.filter(customer_id=customer_id)
+
+    @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAdminUser])
+    def complete(self, request):
+        queryset = Order.complete.all()
+        serializer = CompleteOrderSerializer(queryset, many=True)
+        return Response({"total": len(serializer.data), "data": serializer.data})
+
+    @action(detail=False, methods=['get', 'put'], permission_classes=[IsAdminUser])
+    def fail(self, request):
+        queryset = Order.fail.all()
+        serializer = OrderSerializer(queryset, many=True)
+        return Response({"total": len(serializer.data), "data": serializer.data})
+
+    @action(detail=False, methods=['get', 'put'], permission_classes=[IsAdminUser])
+    def pending(self, request):
+        queryset = Order.pending.all()
+        serializer = OrderSerializer(queryset, many=True)
+        return Response({"total": len(serializer.data), "data": serializer.data})

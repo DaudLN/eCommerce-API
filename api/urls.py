@@ -1,6 +1,7 @@
-from django.urls import path, re_path, include
-from rest_framework.routers import SimpleRouter, DefaultRouter
+from django.urls import include, path, re_path
+from rest_framework.routers import DefaultRouter, SimpleRouter
 from rest_framework_nested import routers
+
 from . import views
 
 app_name = "api"
@@ -10,7 +11,7 @@ router.register("products", views.ProductViewSet, basename="products")
 router.register("collections", views.CollectionViewSet)
 router.register("carts", views.CartViewSet, basename='carts')
 router.register("customers", views.CustomerViewSet)
-
+router.register("orders", views.OrderViewSet, basename='orders')
 # Nested routes
 cart_router = routers.NestedSimpleRouter(router, 'carts', lookup='cart')
 products_router = routers.NestedSimpleRouter(

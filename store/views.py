@@ -1,9 +1,11 @@
-from django.db.models import Q, F
-from django.db.models.aggregates import Avg, Count, Sum, Max, Min
+from django.db.models import F, Q
+from django.db.models.aggregates import Avg, Count, Max, Min, Sum
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext as _
-from .models import Product, OrderItem, Order
+
+from .models import Order, OrderItem, Product
+
 # Create your views here.
 
 
